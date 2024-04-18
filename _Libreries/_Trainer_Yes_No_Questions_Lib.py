@@ -121,8 +121,8 @@ datasets = ["PubmedQA","BioASQ"]
 dataPath = "D:/Chakib Folder/PHD/Papers/Journal - CBQA KG and LLM/Code/Context_Understanding/Pre_Processed_Datasets/"
 
 batch_size = 8
-learning_rate = 3e-5
-number_epoch = 5
+learning_rate = 0.001 #3e-5
+number_epoch = 10
 
 # Those Parameters for learning rate schedular
 factor = 0.1
