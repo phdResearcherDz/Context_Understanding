@@ -38,7 +38,7 @@ class MyDataset(Dataset):
         return len(self.labels)
 
 
-def train_model(model, criterion, optimizer, scheduler, train_loader, num_epochs, device, result_file):
+def train_model(model, criterion, optimizer, scheduler, train_loader, num_epochs, device, result_file,validation_loader):
     for epoch in range(num_epochs):
         model.train()
         train_loss = 0
@@ -51,22 +51,29 @@ def train_model(model, criterion, optimizer, scheduler, train_loader, num_epochs
             outputs = model(input_ids, attention_mask=attention_mask)
             logits = outputs.logits
 
-            loss = criterion(logits.view(-1), labels.float())
+            if logits.shape[-1] == 1:
+                loss = criterion(logits.view(-1), labels.float())
+            else:
+                loss = criterion(logits, labels)
+
             loss.backward()
             optimizer.step()
 
             train_loss += loss.item()
+        print(f"Epoch {epoch + 1} Training Loss: {train_loss / len(train_loader)}")
         result_file.write(f"Epoch {epoch + 1} Training Loss: {train_loss / len(train_loader)}\n")
+        # Testing
+        validate_model(model, validation_loader, device, result_file)
         scheduler.step(loss)  # Update learning rate.
 
 
-def validate_model(model, criterion, val_loader, device, result_file, num_epochs):
+def validate_model(model, validation_loader, device, result_file):
     model.eval()
-    val_loss = 0
     val_correct_predictions = 0
     total_predictions = 0
+
     with torch.no_grad():
-        for batch in tqdm(val_loader, desc=f"Validation Epoch {num_epochs}"):
+        for batch in tqdm(validation_loader, desc="Testing"):
             input_ids = batch['input_ids'].to(device)
             attention_mask = batch['attention_mask'].to(device)
             labels = batch['labels'].to(device)
@@ -74,23 +81,28 @@ def validate_model(model, criterion, val_loader, device, result_file, num_epochs
             outputs = model(input_ids, attention_mask=attention_mask)
             logits = outputs.logits
 
-            loss = criterion(logits.view(-1), labels.float())
-            val_loss += loss.item()
-            preds = torch.sigmoid(logits).view(-1) > 0.5
+            # Check the number of output logits to determine classification type
+            if logits.shape[-1] == 1:
+                # Binary classification with single logit per instance
+                preds = torch.sigmoid(logits.squeeze(-1)) >= 0.5
+                preds = preds.long()  # Convert boolean to long type (0 or 1)
+            else:
+                # Multi-class classification
+                preds = torch.argmax(logits, dim=1)
 
             val_correct_predictions += (preds == labels).sum().item()
             total_predictions += labels.size(0)
-    val_accuracy = val_correct_predictions / total_predictions
-    val_loss /= len(val_loader)
 
-    result_file.write(f'Epoch {num_epochs} Validation Loss: {val_loss}\n')
-    result_file.write(f'Epoch {num_epochs} Validation Accuracy: {val_accuracy}\n')
-    return val_loss
+    test_acc = val_correct_predictions / total_predictions
+    print(f'Validation Accuracy: {test_acc}')
+    result_file.write(f'Validation Accuracy: {test_acc}\n')
+
 
 
 def test_model(model, test_loader, device, result_file):
     model.eval()
-    test_acc = 0
+    test_correct_predictions = 0
+    total_predictions = 0
     with torch.no_grad():
         for batch in tqdm(test_loader, desc="Testing"):
             input_ids = batch['input_ids'].to(device)
@@ -100,11 +112,20 @@ def test_model(model, test_loader, device, result_file):
             outputs = model(input_ids, attention_mask=attention_mask)
             logits = outputs.logits
 
-            preds = torch.sigmoid(logits.squeeze(-1)) >= 0.5
-            preds = preds.long()
+            # Check the number of output logits to determine classification type
+            if logits.shape[-1] == 1:
+                # Binary classification with single logit per instance
+                preds = torch.sigmoid(logits.squeeze(-1)) >= 0.5
+                preds = preds.long()  # Convert boolean to long type (0 or 1)
+            else:
+                # Multi-class classification
+                preds = torch.argmax(logits, dim=1)
 
-            test_acc += (preds == labels).sum().item()
-    test_acc = test_acc / len(test_loader)
+            test_correct_predictions += (preds == labels).sum().item()
+            total_predictions += labels.size(0)
+
+    test_acc = test_correct_predictions / total_predictions
+    print(f'Test Accuracy: {test_acc}')
     result_file.write(f'Test Accuracy: {test_acc}\n')
 
 
@@ -152,14 +173,21 @@ def main():
                 train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
                 test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
 
-                criterion = nn.BCEWithLogitsLoss()
-                model = BertForSequenceClassification.from_pretrained(model_name, num_labels=1)
-                model.to(device)
+                if dataset == "PubmedQA":
+                    # Model
+                    criterion = nn.CrossEntropyLoss()
+                    model = BertForSequenceClassification.from_pretrained(model_name, num_labels=3)
+                else:
+                    # Model
+                    criterion = nn.BCEWithLogitsLoss()
+                    model = BertForSequenceClassification.from_pretrained(model_name, num_labels=1)
+
                 optimizer = optim.AdamW(model.parameters(), lr=3e-5)
+                model.to(device)
                 scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=100, verbose=True)
 
                 # Training
-                train_model(model, criterion, optimizer, scheduler, train_loader, num_epochs, device, result_file)
+                train_model(model, criterion, optimizer, scheduler, train_loader, num_epochs, device, result_file,test_loader)
 
                 # Testing
                 test_model(model, test_loader, device, result_file)
