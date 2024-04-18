@@ -1,12 +1,16 @@
-from datasets import load_dataset
-from ..._Trainer_Yes_No_Questions_Lib import *
+import shutil
+
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+
+from _Libreries._Trainer_Yes_No_Questions_Lib import *
 
 
-def main():
+def main_base_model():
     result_folder = f"results/base_models_result"
     os.makedirs(result_folder, exist_ok=True)
 
     for dataset in datasets:
+        print(dataPath + f"{dataset}/train.json")
         train_data = load_dataset_yes_no(dataPath + f"{dataset}/train.json")
         test_data = load_dataset_yes_no(dataPath + f"{dataset}/test.json")
         for model_name in models:
@@ -14,9 +18,6 @@ def main():
             os.makedirs(model_folder, exist_ok=True)
             dataset_folder = os.path.join(model_folder, dataset)
             os.makedirs(dataset_folder, exist_ok=True)
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            timestamp_folder = os.path.join(dataset_folder, timestamp)
-            os.makedirs(timestamp_folder, exist_ok=True)
             result_file_path = os.path.join(dataset_folder, "results.txt")
 
             with open(result_file_path, "w") as result_file:
@@ -33,17 +34,11 @@ def main():
                 train_dataset = YesNoDataset(train_encodings, train_labels)
                 test_dataset = YesNoDataset(test_encodings, test_labels)
 
-                train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-                test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+                train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+                test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-                if dataset == "PubmedQA":
-                    # Model
-                    criterion = nn.CrossEntropyLoss()
-                    model = BertForSequenceClassification.from_pretrained(model_name, num_labels=3)
-                else:
-                    # Model
-                    criterion = nn.BCEWithLogitsLoss()
-                    model = BertForSequenceClassification.from_pretrained(model_name, num_labels=1)
+                criterion = nn.BCEWithLogitsLoss()
+                model = BertForSequenceClassification.from_pretrained(model_name, num_labels=1)
 
                 optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
                 model.to(device)
@@ -57,9 +52,10 @@ def main():
 
                 # Testing
                 test_acc = test_model(model, test_loader, device, result_file)
+
                 # Save test accuracy to a separate file for accumulating results
                 with open(os.path.join(result_folder, "test_accuracies.txt"), "a") as acc_file:
                     acc_file.write(f"{model_name},{dataset},{test_acc}\n")
 
 if __name__ == '__main__':
-    main()
+    main_base_model()

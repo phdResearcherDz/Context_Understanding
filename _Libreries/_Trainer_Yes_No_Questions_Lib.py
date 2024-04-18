@@ -8,16 +8,15 @@ from transformers import BertTokenizerFast, BertForSequenceClassification
 from tqdm import tqdm
 from datetime import datetime
 import os
-from  Datasets_Models import *
+from  _Libreries.Datasets_Models import *
 
 def load_dataset_yes_no(filepath):
     try:
         with open(filepath, 'r') as file:
             data = json.load(file)
-            if any('type' in item and item['type'] == 'yesno' for item in data):
-                filtered_data = [item for item in data if item.get('type') == 'yesno']
-                return filtered_data
-            return data
+            filtered_data = [item for item in data if item.get('answer') == 'yes' or item.get('answer') == 'no']
+            return filtered_data
+
     except FileNotFoundError:
         print("The file was not found.")
     except json.JSONDecodeError:
@@ -40,10 +39,7 @@ def train_model(model, criterion, optimizer, scheduler, train_loader, num_epochs
             outputs = model(input_ids, attention_mask=attention_mask)
             logits = outputs.logits
 
-            if logits.shape[-1] == 1:
-                loss = criterion(logits.view(-1), labels.float())
-            else:
-                loss = criterion(logits, labels)
+            loss = criterion(logits.view(-1), labels.float())
 
             loss.backward()
             optimizer.step()
@@ -51,20 +47,19 @@ def train_model(model, criterion, optimizer, scheduler, train_loader, num_epochs
             train_loss += loss.item()
 
         # Testing
-        validate_model(model, validation_loader, device, result_file)
-        scheduler.step(loss)  # Update learning rate.
 
         # Validation step
         accuracy = validate_model(model, validation_loader, device, result_file)
         if accuracy > best_accuracy:
             best_accuracy = accuracy
-            best_model_path = os.path.join(os.path.dirname(result_file),
+            best_model_path = os.path.join(os.path.dirname(result_file.name),
                                            f"best_model.pt")
             torch.save(model.state_dict(), best_model_path)
+        scheduler.step(loss)  # Update learning rate.
 
         print(f"Epoch {epoch + 1} Training Loss: {train_loss / len(train_loader)}")
         result_file.write(f"Epoch {epoch + 1} Training Loss: {train_loss / len(train_loader)}\n")
-        return  best_model_path
+    return  best_model_path
 
 def validate_model(model, validation_loader, device, result_file):
     model.eval()
@@ -72,7 +67,7 @@ def validate_model(model, validation_loader, device, result_file):
     total_predictions = 0
 
     with torch.no_grad():
-        for batch in tqdm(validation_loader, desc="Testing"):
+        for batch in tqdm(validation_loader, desc="Validation"):
             input_ids = batch['input_ids'].to(device)
             attention_mask = batch['attention_mask'].to(device)
             labels = batch['labels'].to(device)
@@ -80,14 +75,9 @@ def validate_model(model, validation_loader, device, result_file):
             outputs = model(input_ids, attention_mask=attention_mask)
             logits = outputs.logits
 
-            # Check the number of output logits to determine classification type
-            if logits.shape[-1] == 1:
-                # Binary classification with single logit per instance
-                preds = torch.sigmoid(logits.squeeze(-1)) >= 0.5
-                preds = preds.long()  # Convert boolean to long type (0 or 1)
-            else:
-                # Multi-class classification
-                preds = torch.argmax(logits, dim=1)
+            # Binary classification with single logit per instance
+            preds = torch.sigmoid(logits.squeeze(-1)) >= 0.5
+            preds = preds.long()  # Convert boolean to long type (0 or 1)
 
             val_correct_predictions += (preds == labels).sum().item()
             total_predictions += labels.size(0)
@@ -111,14 +101,9 @@ def test_model(model, test_loader, device, result_file):
             outputs = model(input_ids, attention_mask=attention_mask)
             logits = outputs.logits
 
-            # Check the number of output logits to determine classification type
-            if logits.shape[-1] == 1:
-                # Binary classification with single logit per instance
-                preds = torch.sigmoid(logits.squeeze(-1)) >= 0.5
-                preds = preds.long()  # Convert boolean to long type (0 or 1)
-            else:
-                # Multi-class classification
-                preds = torch.argmax(logits, dim=1)
+            # Binary classification with single logit per instance
+            preds = torch.sigmoid(logits.squeeze(-1)) >= 0.5
+            preds = preds.long()  # Convert boolean to long type (0 or 1)
 
             test_correct_predictions += (preds == labels).sum().item()
             total_predictions += labels.size(0)
@@ -129,11 +114,11 @@ def test_model(model, test_loader, device, result_file):
     return test_acc
 
 label_map = {"yes": 1, "no": 0, "maybe": 2}
-
+#"Tolerblanc/biogpt_Readmission"
 models = ["bert-base-uncased","cambridgeltl/SapBERT-from-PubMedBERT-fulltext","dmis-lab/biobert-v1.1","michiyasunaga/BioLinkBERT-base"]
 
-datasets = ["BioASQ","PubmedQA"]
-dataPath = "../Pre_Processed_Datasets/"
+datasets = ["PubmedQA","BioASQ"]
+dataPath = "D:/Chakib Folder/PHD/Papers/Journal - CBQA KG and LLM/Code/Context_Understanding/Pre_Processed_Datasets/"
 
 batch_size = 8
 learning_rate = 3e-5

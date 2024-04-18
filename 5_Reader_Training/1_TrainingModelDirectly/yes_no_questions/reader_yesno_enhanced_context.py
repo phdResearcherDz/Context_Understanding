@@ -1,9 +1,11 @@
-from datasets import load_dataset
-from ..._Trainer_Yes_No_Questions_Lib import *
+import shutil
+
+from _Libreries._Trainer_Yes_No_Questions_Lib import *
 
 
-def main():
+def main_enhanced_context():
     result_folder = f"results/enhanced_context"
+
     os.makedirs(result_folder, exist_ok=True)
 
     for dataset in datasets:
@@ -43,14 +45,10 @@ def main():
                 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
                 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-                if dataset == "PubmedQA":
-                    # Model
-                    criterion = nn.CrossEntropyLoss()
-                    model = BertForSequenceClassification.from_pretrained(model_name, num_labels=3)
-                else:
-                    # Model
-                    criterion = nn.BCEWithLogitsLoss()
-                    model = BertForSequenceClassification.from_pretrained(model_name, num_labels=1)
+                # Model
+                criterion = nn.BCEWithLogitsLoss()
+                model = BertForSequenceClassification.from_pretrained(model_name, num_labels=1)
+
 
                 optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
                 model.to(device)
@@ -69,4 +67,4 @@ def main():
                     acc_file.write(f"{model_name},{dataset},{test_acc}\n")
 
 if __name__ == '__main__':
-    main()
+    main_enhanced_context()

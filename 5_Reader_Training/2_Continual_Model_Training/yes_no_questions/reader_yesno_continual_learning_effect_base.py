@@ -1,12 +1,18 @@
+import shutil
+
 import numpy as np
 from sklearn.model_selection import train_test_split
 
-from ..._Trainer_Yes_No_Questions_Lib import *
-from ...Split_Dataset import *
+from _Libreries.Split_Dataset import *
 
 
-def main():
+def main_cl_base_model():
     result_folder = f"results/base_models_result_continual_learning"
+
+    if os.path.exists(result_folder):
+        # Remove the folder and all its contents
+        shutil.rmtree(result_folder)
+
     os.makedirs(result_folder, exist_ok=True)
 
     for dataset in datasets:
@@ -51,9 +57,9 @@ def main():
                 test_dataset = YesNoDataset(test_encodings, test_labels)
 
                 # DataLoader
-                train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
-                val_loader = DataLoader(val_dataset, batch_size=8, shuffle=False)
-                test_loader = DataLoader(test_dataset, batch_size=8, shuffle=False)
+                train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+                val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+                test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
                 if dataset == "PubmedQA":
                     # Model
@@ -129,4 +135,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main_cl_base_model()
