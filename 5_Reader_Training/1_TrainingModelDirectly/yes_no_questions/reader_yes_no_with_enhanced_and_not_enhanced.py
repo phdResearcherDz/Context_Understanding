@@ -11,32 +11,27 @@ def prepare_data_for_tokenization(data, tokenizer, max_length=512):
     # Prepare data with conditional concatenation based on token count
     processed_data = []
     for item in data:
+        processed_data.append((item["question"], item["context"]))
         # Create combined text
+        if(len(item['enhanced_text']) == 0):
+            continue
         combined_text = f"{item['context']} [SEP] {item['enhanced_text']}"
         # Check token count
         if calculate_token_count(combined_text, tokenizer) <= max_length:
             processed_text = combined_text
-        else:
-            processed_text = item["context"]
-
-        processed_data.append((item["question"], processed_text))
+            processed_data.append((item["question"], processed_text))
 
     return processed_data
 
 
-def main_enhanced_context():
-    result_folder = f"results/base_then_enhanced_same_data"
+def main_enhanced_context_both_enhanced_and_not():
+    result_folder = f"results/enhanced_context_and_not_enhanced"
 
     os.makedirs(result_folder, exist_ok=True)
 
     for dataset in datasets:
         train_data = load_dataset_yes_no(dataPath + f"{dataset}/5_enhanced_formated/train_enhanced.json")
-        val_data = load_dataset_yes_no(dataPath + f"{dataset}/5_enhanced_formated/test_enhanced.json")
         test_data = load_dataset_yes_no(dataPath + f"{dataset}/5_enhanced_formated/test_enhanced.json")
-
-        train_processed = prepare_data_for_tokenization(train_data, tokenizer)
-        val_processed = prepare_data_for_tokenization(val_data, tokenizer)
-        test_processed = prepare_data_for_tokenization(test_data, tokenizer)
 
         for model_name in models:
             model_folder = os.path.join(result_folder, model_name.replace("/", "_"))
@@ -48,6 +43,9 @@ def main_enhanced_context():
             with open(result_file_path, "w") as result_file:
                 result_file.write(f"**************** - {model_name} {dataset}- ****************\n")
                 tokenizer = BertTokenizerFast.from_pretrained(model_name)
+                train_processed = prepare_data_for_tokenization(train_data, tokenizer)
+                test_processed = prepare_data_for_tokenization(test_data, tokenizer)
+
                 train_encodings = tokenizer(
                     train_processed,
                     truncation=True,
@@ -93,4 +91,4 @@ def main_enhanced_context():
                     acc_file.write(f"{model_name},{dataset},{test_acc}\n")
 
 if __name__ == '__main__':
-    main_enhanced_context()
+    main_enhanced_context_both_enhanced_and_not()

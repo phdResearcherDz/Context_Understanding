@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import Dataset, DataLoader
-from transformers import BertTokenizerFast, BertForSequenceClassification
+from transformers import BertTokenizerFast, BertForSequenceClassification, get_linear_schedule_with_warmup
 from tqdm import tqdm
 from datetime import datetime
 import os
@@ -25,6 +25,9 @@ def load_dataset_yes_no(filepath):
         print(f"An error occurred: {e}")
 
 def train_model(model, criterion, optimizer, scheduler, train_loader, num_epochs, device, result_file, validation_loader):
+    total_steps = len(train_loader) * num_epochs
+    scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=100, num_training_steps=total_steps)
+
     best_accuracy = 0
     best_model_path = ""
     for epoch in range(num_epochs):
@@ -43,7 +46,7 @@ def train_model(model, criterion, optimizer, scheduler, train_loader, num_epochs
 
             loss.backward()
             optimizer.step()
-
+            scheduler.step()
             train_loss += loss.item()
 
         # Testing
@@ -55,7 +58,7 @@ def train_model(model, criterion, optimizer, scheduler, train_loader, num_epochs
             best_model_path = os.path.join(os.path.dirname(result_file.name),
                                            f"best_model.pt")
             torch.save(model.state_dict(), best_model_path)
-        scheduler.step(loss)  # Update learning rate.
+
 
         print(f"Epoch {epoch + 1} Training Loss: {train_loss / len(train_loader)}")
         result_file.write(f"Epoch {epoch + 1} Training Loss: {train_loss / len(train_loader)}\n")
@@ -120,9 +123,9 @@ models = ["bert-base-uncased","cambridgeltl/SapBERT-from-PubMedBERT-fulltext","d
 datasets = ["PubmedQA","BioASQ"]
 dataPath = "D:/Chakib Folder/PHD/Papers/Journal - CBQA KG and LLM/Code/Context_Understanding/Pre_Processed_Datasets/"
 
-batch_size = 8
-learning_rate = 0.001 #3e-5
-number_epoch = 10
+batch_size = 16
+learning_rate = 2e-5 #3e-5
+number_epoch = 20
 
 # Those Parameters for learning rate schedular
 factor = 0.1
