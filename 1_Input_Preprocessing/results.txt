@@ -1,6 +1,0 @@
-NER operation on PrimeKG nodes:
-- using model "d4data/biomedical-ner-all" from Hugging Face
-Number of errors: 82754 , Total :129375 with accu = 0.639
-
-- using NLTK and spacy :
-Number of errors: 81428, Total nouns: 129375 with acc = 0.629

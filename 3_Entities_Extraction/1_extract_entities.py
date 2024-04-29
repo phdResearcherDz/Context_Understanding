@@ -1,26 +1,18 @@
 import json
 import os
-import string
-
-import nltk
 import spacy
-import stanza
-from nltk.corpus import stopwords
 from tqdm import tqdm
-from transformers import AutoTokenizer, AutoModelForTokenClassification
-from transformers import pipeline
 
-list_datasets = ["PubmedQA","BioASQ","MedMCQA","MEDQA", "QA4MRE-Alz"]#,
-nltk.download('stopwords')
-stop_words = set(stopwords.words('english'))
-
+list_datasets = ["PubmedQA","BioASQ"]#,
+# nlp = spacy.load("en_core_sci_sm")
+nlp = spacy.load("en_ner_bionlp13cg_md")
 
 def extract_entities(context):
     if context is None:
         return None
-
-    nlp = spacy.load("en_core_sci_sm")
     doc = nlp(context)
+    for ent in doc.ents:
+        print(f"{ent.text} : {ent.label_}")
     medical_entities = [ent.text for ent in doc.ents]
     return medical_entities
 
@@ -31,10 +23,16 @@ def process_json_file(file_path, output_directory):
         new_data = []
         for item in tqdm(data):
             context = item['context']
-            entities = extract_entities(context)
-            if entities is None:
+            question = item['question']
+            entities_context = extract_entities(context)
+            entities_question = extract_entities(question)
+            if entities_context is None or entities_question is None:
+                new_data.append(item)
                 continue
-            item['context_entities'] = entities
+
+            item['context_entities'] = entities_context
+            item['question_entities'] = entities_question
+
             new_data.append(item)
 
     os.makedirs(output_directory, exist_ok=True)
@@ -46,7 +44,7 @@ def process_json_file(file_path, output_directory):
 if __name__ == '__main__':
     for dataset in list_datasets:
         path_dataset = f"../Pre_Processed_Datasets/{dataset}"
-        output_directory = os.path.join(path_dataset, '1_extracted_entities')
+        output_directory = os.path.join(path_dataset, '3_extracted_entities_v2')
 
         # Process each JSON file in the directory
         for filename in os.listdir(path_dataset):

@@ -5,6 +5,7 @@
       <excludeFolder url="file://$MODULE_DIR$/Datasets" />
       <excludeFolder url="file://$MODULE_DIR$/Pre_Processed_Datasets" />
       <excludeFolder url="file://$MODULE_DIR$/extra_materials" />
+      <excludeFolder url="file://$MODULE_DIR$/_materials" />
     </content>
     <orderEntry type="jdk" jdkName="Bert_For_Biomedicine" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
