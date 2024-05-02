@@ -13,7 +13,7 @@ def connect_to_neo4j(uri, username, password):
     return GraphDatabase.driver(uri, auth=(username, password))
 
 
-def get_node_details(driver, node_name,node_name_attribute,allowed_attributes):
+def _get_node_details(driver, node_name,node_name_attribute,allowed_attributes):
     with driver.session() as session:
         # Query to get node attributes
         node_attributes_result = session.run("MATCH (n {node_name: $node_name}) RETURN n", node_name=node_name).single()
@@ -42,25 +42,47 @@ def get_node_details(driver, node_name,node_name_attribute,allowed_attributes):
     return {"attributes": node_attributes, "triples": triples}
 
 
+def get_node_details(driver, node_name,node_name_attribute,allowed_attributes):
+    with driver.session() as session:
+        # Query to get related triples where the node is the source
+        result = session.run(
+            "MATCH (n {node_name: $node_name})-[r]->(m) RETURN type(r) as relation, collect(m."+node_name_attribute+") as nodes",
+            node_name=node_name)
+
+        # Process the result into the desired format
+        triples = []
+        for record in result:
+            triple = {
+                "source": node_name,
+                "relation": record["relation"],
+                "target_nodes": record["nodes"]
+            }
+            triples.append(triple)
+
+    return {"triples": triples}
+
+
 def process_json(driver,json_file_path, kg_name, node_name_attribute,allowed_attributes):
     with open(json_file_path, 'r') as file:
         data = json.load(file)
 
     new_data = list()
     for item in tqdm(data):
-        question_medical_concepts_primekg = set(item.get(f"{kg_name}_concepts_context", ''))
-        context_medical_concepts_primekg = set(item.get(f"{kg_name}_concepts_context", ''))
+        question_medical_concepts_primekg = item.get(f"{kg_name}_concepts_context", '')
+        context_medical_concepts_primekg = item.get(f"{kg_name}_concepts_context", '')
 
         question_with_kg = dict()
         context_with_kg = dict()
-        if question_with_kg:
+        if question_medical_concepts_primekg:
             for concept in question_medical_concepts_primekg:
-                extracted_data_question = get_node_details(driver,concept,node_name_attribute,allowed_attributes)
+                node = question_medical_concepts_primekg[concept]
+                extracted_data_question = get_node_details(driver,node,node_name_attribute,allowed_attributes)
                 question_with_kg[concept] = extracted_data_question
 
-        if context_with_kg:
+        if context_medical_concepts_primekg:
             for concept in context_medical_concepts_primekg:
-                extracted_data_context = get_node_details(driver, concept,node_name_attribute,allowed_attributes)
+                node = context_medical_concepts_primekg[concept]
+                extracted_data_context = get_node_details(driver, node,node_name_attribute,allowed_attributes)
                 context_with_kg[concept] = extracted_data_context
 
         item[f"{kg_name}_concepts_question_with_kg_data"] = question_with_kg

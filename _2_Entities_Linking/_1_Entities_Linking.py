@@ -71,7 +71,7 @@ def entities_linking():
 
         # Merge data
         merged_data = merge_records(data1, data2,type="test",kg1=kgs[0],kg2 = kgs[1])
-        output_file_path = os.path.join(directory_path, f"test_{dataset}.json")
+        output_file_path = os.path.join(directory_path, f"test.json")
         with open(output_file_path, 'w') as outfile:
             json.dump(merged_data, outfile, indent=4)
         
@@ -80,7 +80,7 @@ def entities_linking():
         data2 = load_json_file(f'{directory_path}\\train_{kgs[1]}_{dataset}_with_concept.json')
         
         merged_data = merge_records(data1, data2,type="train",kg1=kgs[0],kg2 = kgs[1])
-        output_file_path = os.path.join(directory_path, f"train_{dataset}.json")
+        output_file_path = os.path.join(directory_path, f"train.json")
         with open(output_file_path, 'w') as outfile:
             json.dump(merged_data, outfile, indent=4)
 
