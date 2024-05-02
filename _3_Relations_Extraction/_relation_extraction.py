@@ -40,7 +40,8 @@ def ProcessHetionet():
         process_dataset(driver, dataset,kg="hetionet",node_name_attribute="name",allowed_attributes=allowed_attributes)
 
 
-if __name__ == "__main__":
+
+def relation_extraction():
     ProcessPrimeKG()
     ProcessHetionet()
     
@@ -66,3 +67,6 @@ if __name__ == "__main__":
         output_file_path = os.path.join(directory_path, f"train_{dataset}_merged_relations.json")
         with open(output_file_path, 'w') as outfile:
             json.dump(merged_data, outfile, indent=4)
+            
+if __name__ == "__main__":
+    relation_extraction()

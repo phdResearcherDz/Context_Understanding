@@ -102,10 +102,10 @@ def process_dataset(dataset):
             json.dump(new_data, new_file, indent=4)
 
 # Main function
-def main():
+def filter_relations():
     datasets = ["BIOMRC"]
     for dataset in datasets:
         process_dataset(dataset)
 
 if __name__ == "__main__":
-    main()
+    filter_relations()
