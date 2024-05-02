@@ -1,2 +1,0 @@
-root_folder = "/"
-datasets = []

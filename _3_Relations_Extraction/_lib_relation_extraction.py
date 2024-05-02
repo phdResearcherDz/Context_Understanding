@@ -7,6 +7,7 @@ from neo4j import GraphDatabase
 from tqdm import tqdm
 import torch
 
+root_folder = "."
 
 
 def connect_to_neo4j(uri, username, password):
@@ -32,34 +33,43 @@ def _get_node_details(driver, node_name,node_name_attribute,allowed_attributes):
         # Process the result into the desired format
         triples = []
         for record in result:
-            triple = {
-                "source": node_name,
-                "relation": record["relation"],
-                "target_nodes": record["nodes"]
-            }
+            for node in record["nodes"]:
+                triple = {
+                    "source": node_name,
+                    "relation": record["relation"],
+                    "target_nodes": node
+                }
+                print(f"source: {node_name} relation: {record["relation"]} target_nodes:{node}" )
             triples.append(triple)
 
     return {"attributes": node_attributes, "triples": triples}
 
 
-def get_node_details(driver, node_name,node_name_attribute,allowed_attributes):
+def get_node_details(driver, node_name, node_name_attribute, allowed_attributes):
     with driver.session() as session:
         # Query to get related triples where the node is the source
         result = session.run(
-            "MATCH (n {node_name: $node_name})-[r]->(m) RETURN type(r) as relation, collect(m."+node_name_attribute+") as nodes",
+            "MATCH (n {node_name: $node_name})-[r]-(m) RETURN type(r) as relation, collect(m." + node_name_attribute + ") as nodes",
             node_name=node_name)
 
         # Process the result into the desired format
-        triples = []
+        triples = set()
         for record in result:
-            triple = {
-                "source": node_name,
-                "relation": record["relation"],
-                "target_nodes": record["nodes"]
-            }
-            triples.append(triple)
+            for node in record["nodes"]:
+                # Create a dictionary of the triple
+                triple = {
+                    "source": node_name,
+                    "relation": record["relation"],
+                    "target_nodes": node
+                }
+                # Convert dictionary to frozenset of items to make it hashable
+                hashable_triple = frozenset(triple.items())
+                triples.add(hashable_triple)  # Add hashable triple to set
+                # print(f"source: {node_name}, relation: {record['relation']}, target_nodes: {node}")
 
-    return {"triples": triples}
+    # Convert set of frozensets back to list of dicts for output
+    list_of_triples = [dict(triple) for triple in triples]
+    return {"triples": list_of_triples}
 
 
 def process_json(driver,json_file_path, kg_name, node_name_attribute,allowed_attributes):
@@ -92,13 +102,13 @@ def process_json(driver,json_file_path, kg_name, node_name_attribute,allowed_att
     return new_data
 
 def process_dataset(driver, dataset, kg_name, node_name_attribute,allowed_attributes):
-    directory_path = f'../Pre_Processed_Datasets/{dataset}/2_kg_linked_entities/'
+    directory_path = f'{root_folder}/Pre_Processed_Datasets/{dataset}/2_kg_linked_entities/'
     for json_file_path in glob.glob(directory_path + '*.json'):
         new_data = process_json(driver, json_file_path, kg_name, node_name_attribute,allowed_attributes)
 
         # Create new file path
         directory, filename = os.path.split(json_file_path)
-        new_directory = f"../Pre_Processed_Datasets/{dataset}/3_extracted_concepts_relations"
+        new_directory = f"{root_folder}/Pre_Processed_Datasets/{dataset}/3_extracted_concepts_relations"
         os.makedirs(new_directory,exist_ok=True)
 
         new_filename = os.path.splitext(filename)[0] + f"_{kg_name}_{dataset}_with_relations.json"

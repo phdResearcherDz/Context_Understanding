@@ -7,22 +7,17 @@ def ProcessPrimeKG():
     uri = "bolt://localhost:7687"
     username = "neo4j"
     password = "kira.@1830"
-    # allowed_attributes = [
+    allowed_attributes = [
     # "atc_1", "atc_2", "atc_3", "atc_4", "category", "clogp", "description", "half_life", "indication",
     # "mayo_causes", "mayo_complications", "mayo_prevention", "mayo_risk_factors",
     # "mayo_see_doc", "mayo_symptoms", "mechanism_of_action", "molecular_weight",
     # "mondo_definition", "mondo_name", "orphanet_clinical_description",
     # "orphanet_definition", "orphanet_epidemiology", "orphanet_management_and_treatment",
     # "orphanet_prevalence", "pathway", "pharmacodynamics", "protein_binding", "state", "tpsa", "umls_description"
-    # ]
-
-    allowed_attributes = [
-
     ]
-    
+
     driver = connect_to_neo4j(uri, username, password)
 
-    threads = []
     for dataset in datasets:
         process_dataset(driver, dataset,kg_name="primekg",node_name_attribute="node_name",allowed_attributes=allowed_attributes)
 
