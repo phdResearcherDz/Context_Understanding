@@ -9,6 +9,10 @@ import torch
 from transformers import  pipeline
 
 root_folder = "."
+# Load the summarization pipeline and set it to use the GPU if available
+device = 0 if torch.cuda.is_available() else -1  # -1 means CPU
+summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=device)
+
 
 def get_all_concepts_with_definition(context_ent, question_ent):
     allConcepts = {}
@@ -28,16 +32,34 @@ def get_all_concepts_with_definition(context_ent, question_ent):
     process_entities(question_ent)
 
     return allConcepts
+
 def summarize_text(text):
-    # Check if CUDA is available and then specify to use GPU (device 0 by default)
-    device = 0 if torch.cuda.is_available() else -1  # -1 means CPU
+    # Assuming the model's tokenizer is needed to count tokens accurately
+    tokenizer = summarizer.tokenizer
+    tokens = tokenizer.tokenize(text)
+    token_count = len(tokens)
 
-    # Load the summarization pipeline and set it to use the GPU if available
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=device)
+    # Define a minimum token count threshold for summarization
+    min_token_threshold = 50  # Adjust this value as necessary
 
-    # Perform summarization
-    summary = summarizer(text, max_length=130, min_length=30, do_sample=False)
-    return summary
+    # Ensure we do not proceed if the text is too small or exceeds the model's maximum input size
+    model_max_input_size = tokenizer.model_max_length
+    if token_count < min_token_threshold or token_count > model_max_input_size:
+        return "Text is too small or too large for summarization."
+
+    # Set max input length to half of the token count for dynamic summarization
+    max_input_length = min(token_count // 2, model_max_input_size)
+
+    # Set a minimum input length ensuring it is always less than max_input_length
+    min_input_length = max(25, max_input_length // 2)  # Set some reasonable fraction of max_input_length
+
+    # Adjust min_input_length if necessary to ensure it is less than max_input_length
+    if min_input_length >= max_input_length:
+        min_input_length = max_input_length // 2
+
+    # Perform summarization with dynamic input length constraints
+    summary = summarizer(text, min_length=min_input_length, max_length=max_input_length, do_sample=False)
+    return summary[0]["summary_text"]
 
 def get_item_metadata(context_entities, question_entities, primekg_relevant_relations, hetionet_relevant_relations):
     # Get all concepts with definitions
