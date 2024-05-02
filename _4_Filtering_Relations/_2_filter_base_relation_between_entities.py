@@ -1,6 +1,6 @@
 from _lib_relation_filter_qc import *
 
-datasets = ["PubmedQA"]  # "BioASQ", "
+datasets = ["BioASQ"]  # "BioASQ", "
 
 
 def ProcessPrimeKG():
