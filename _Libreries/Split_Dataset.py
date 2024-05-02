@@ -1,6 +1,6 @@
 from sklearn.model_selection import train_test_split
 import pickle
-from _Trainer_Yes_No_Questions_Lib import *
+from _Libreries._Trainer_Yes_No_Questions_Lib import  *
 
 def save_data_pickle(data, filename):
     with open(filename, 'wb') as f:

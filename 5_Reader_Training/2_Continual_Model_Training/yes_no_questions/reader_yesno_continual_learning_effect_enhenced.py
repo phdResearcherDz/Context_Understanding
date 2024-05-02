@@ -59,14 +59,8 @@ def main_cl_enhanced_context_model():
                 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
                 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-                if dataset == "PubmedQA":
-                    # Model
-                    criterion = nn.CrossEntropyLoss()
-                    model = BertForSequenceClassification.from_pretrained(model_name, num_labels=3)
-                else:
-                    # Model
-                    criterion = nn.BCEWithLogitsLoss()
-                    model = BertForSequenceClassification.from_pretrained(model_name, num_labels=1)
+                criterion = nn.BCEWithLogitsLoss()
+                model = BertForSequenceClassification.from_pretrained(model_name, num_labels=1)
 
                 optimizer = optim.AdamW(model.parameters(), lr=learning_rate)
                 model.to(device)
@@ -80,9 +74,9 @@ def main_cl_enhanced_context_model():
                 model.load_state_dict(torch.load(best_model_path))
 
                 # Testing
-                test_acc = test_model(model, test_loader, device, result_file)
                 # Save test accuracy to a separate file for accumulating results
                 with open(os.path.join(result_folder, "test_accuracies.txt"), "a") as acc_file:
+                    test_acc = test_model(model, test_loader, device, acc_file)
                     acc_file.write(f"{model_name},{dataset},{test_acc}\n")
 
             #------------------------------------------------------------------------------------------------------
@@ -111,13 +105,13 @@ def main_cl_enhanced_context_model():
                         # Training
                         best_model_path = train_model(model, criterion, optimizer, scheduler, quarter_loader,
                                                       number_epoch,
-                                                      device, result_file, test_loader)
+                                                      device, result_continual_file, test_loader)
 
                         # Load best model and test
                         model.load_state_dict(torch.load(best_model_path))
 
                         # Testing the model
-                        test_acc = test_model(model, test_loader, device, result_file)
+                        test_acc = test_model(model, test_loader, device, result_continual_file)
                         iteration_accuracies.append(test_acc)
 
                     # Store the average accuracy of this iteration
@@ -126,11 +120,12 @@ def main_cl_enhanced_context_model():
 
                 overall_mean_acc = []
                 for iteration_accuracies in test_accuracies:
+                    part_acc = 0
                     for i in range(number_parts):
                         part_acc = iteration_accuracies[i] + part_acc
                     overall_mean_acc.append(part_acc/num_iterations)
                 print(f"Overall mean test accuracy after {num_iterations} iterations: {overall_mean_acc}")
-
+                result_continual_file.write(f"Overall mean test accuracy after {num_iterations} iterations: {overall_mean_acc}")
 
 if __name__ == '__main__':
     main_cl_enhanced_context_model()

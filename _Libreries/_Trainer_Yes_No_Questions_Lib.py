@@ -118,14 +118,14 @@ def test_model(model, test_loader, device, result_file):
 
 label_map = {"yes": 1, "no": 0, "maybe": 2}
 #"Tolerblanc/biogpt_Readmission"
-models = ["bert-base-uncased","cambridgeltl/SapBERT-from-PubMedBERT-fulltext","dmis-lab/biobert-v1.1","michiyasunaga/BioLinkBERT-base"]
+models = ["google-bert/bert-large-uncased","bert-base-uncased","cambridgeltl/SapBERT-from-PubMedBERT-fulltext","dmis-lab/biobert-v1.1","michiyasunaga/BioLinkBERT-base","michiyasunaga/BioLinkBERT-large"]
 
 datasets = ["PubmedQA","BioASQ"]
 dataPath = "D:/Chakib Folder/PHD/Papers/Journal - CBQA KG and LLM/Code/Context_Understanding/Pre_Processed_Datasets/"
 
-batch_size = 16
+batch_size = 8
 learning_rate = 2e-5 #3e-5
-number_epoch = 20
+number_epoch = 8
 
 # Those Parameters for learning rate schedular
 factor = 0.1
