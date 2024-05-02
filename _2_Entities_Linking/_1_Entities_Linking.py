@@ -50,7 +50,7 @@ def merge_records(data1, data2,type="test",kg1 ="primekg", kg2 = "hetionet"):
         merged_data.append(item)
     return merged_data
 
-if __name__ == "__main__":
+def entities_linking():
     print("Process Hetionet")
     print("*"*10)
     ProcessHetionet()
@@ -83,3 +83,6 @@ if __name__ == "__main__":
         output_file_path = os.path.join(directory_path, f"train_{dataset}.json")
         with open(output_file_path, 'w') as outfile:
             json.dump(merged_data, outfile, indent=4)
+
+if __name__ == "__main__":
+    entities_linking()

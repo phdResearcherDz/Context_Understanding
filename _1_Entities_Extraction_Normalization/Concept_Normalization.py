@@ -163,8 +163,7 @@ def process_json_file(file_path, output_directory):
     with open(output_file_path, 'w', encoding='utf-8') as file:
         json.dump(data, file, indent=4)
 
-
-if __name__ == '__main__':
+def entities_normalization():
     for dataset in list_datasets:
         print(f"Process Dataset {dataset}")
         path_dataset = f"../Pre_Processed_Datasets/{dataset}"
@@ -175,4 +174,7 @@ if __name__ == '__main__':
             if filename.endswith(".json"):
                 file_path = os.path.join(path_dataset, filename)
                 process_json_file(file_path, output_directory)
+
+if __name__ == '__main__':
+    entities_normalization()
 
