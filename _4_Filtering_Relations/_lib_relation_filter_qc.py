@@ -7,7 +7,7 @@ from neo4j import GraphDatabase
 from tqdm import tqdm
 import torch
 
-root_folder = ".."
+root_folder = "."
 
 
 def connect_to_neo4j(uri, username, password):
@@ -22,30 +22,30 @@ def get_all_concepts(context_ent,question_ent):
         allConcepts.append(item)
     return allConcepts
 
-def process_json(driver,json_file_path, kg_name, node_name_attribute,allowed_attributes):
+def process_json(json_file_path, kg_name):
     with open(json_file_path, 'r') as file:
         data = json.load(file)
 
     new_data = list()
     for item in tqdm(data):
-        question_medical_concepts = item.get(f"{kg_name}concepts_context", '')
-        context_medical_concepts = item.get(f"{kg_name}concepts_context", '')
+        question_medical_concepts = item.get(f"{kg_name}_concepts_question", '')
+        context_medical_concepts = item.get(f"{kg_name}_concepts_context", '')
 
         question_medical_concepts_relations = item.get(f"{kg_name}_concepts_question_with_kg_data", '')
         context_medical_concepts_relations = item.get(f"{kg_name}_concepts_context_with_kg_data", '')
 
         relevant_relations_filtered_qc = []
         all_concepts = get_all_concepts(context_medical_concepts,question_medical_concepts)
-
+        print(all_concepts)
         #select relvant relations from context
         for concept in context_medical_concepts_relations:
-            triples = context_medical_concepts_relations[concept]
+            triples = context_medical_concepts_relations[concept]["triples"]
             for triple in triples:
                 if triple["target_nodes"] in all_concepts:
                     relevant_relations_filtered_qc.append(triple)
         #select relevant relations from question
         for concept in question_medical_concepts_relations:
-            triples = question_medical_concepts_relations[concept]
+            triples = question_medical_concepts_relations[concept]["triples"]
             for triple in triples:
                 if triple["target_nodes"] in all_concepts:
                     relevant_relations_filtered_qc.append(triple)
@@ -55,10 +55,10 @@ def process_json(driver,json_file_path, kg_name, node_name_attribute,allowed_att
         new_data.append(item)
     return new_data
 
-def process_dataset(driver, dataset, kg_name, node_name_attribute,allowed_attributes):
+def process_dataset(dataset, kg_name):
     directory_path = f'{root_folder}/Pre_Processed_Datasets/{dataset}/3_extracted_concepts_relations/'
     for json_file_path in glob.glob(directory_path + '*.json'):
-        new_data = process_json(driver, json_file_path, kg_name, node_name_attribute,allowed_attributes)
+        new_data = process_json(json_file_path, kg_name)
 
         # Create new file path
         directory, filename = os.path.split(json_file_path)
@@ -89,7 +89,6 @@ def merge_records(data1, data2,type="test",kg1 ="primekg", kg2 = "hetionet"):
     for ind1,question in enumerate(data1):
         item = data1[ind1]
         item2 = data2[ind1]
-        item[f"{kg2}_concepts_context_with_kg_data_filtered"] = item2[f"{kg2}_concepts_context_with_kg_data_filtered"]
-        item[f"{kg2}_concepts_question_with_kg_data_filtered"] = item2[f"{kg2}_concepts_question_with_kg_data_filtered"]
+        item[f"{kg2}_relevant_relations_qc"] = item2[f"{kg2}_relevant_relations_qc"]
         merged_data.append(item)
     return merged_data

@@ -1,6 +1,6 @@
 from _lib_relation_extraction import *
 
-datasets = ["BioASQ","PubmedQA"] #BioASQ,"QA4MRE-Alz","MEDQA" , "MedMCQA"
+datasets = ["BioASQ"] #"PubmedQA"
 
 
 def ProcessPrimeKG():
@@ -44,28 +44,28 @@ def relation_extraction():
     ProcessPrimeKG()
     ProcessHetionet()
     
-    # kgs = ["primekg","hetionet"]
-    # for dataset in datasets:
-    #     directory_path = f"../Pre_Processed_Datasets/{dataset}/3_extracted_concepts_relationss"
-    #
-    #     # Load data from files
-    #     data1 = load_json_file(f'{directory_path}\\test_{kgs[0]}_{dataset}_with_relations.json')
-    #     data2 = load_json_file(f'{directory_path}\\test_{kgs[1]}_{dataset}_with_relations.json')
-    #
-    #     # Merge data
-    #     merged_data = merge_records(data1, data2,type="test",kg1=kgs[0],kg2 = kgs[1])
-    #     output_file_path = os.path.join(directory_path, f"test.json")
-    #     with open(output_file_path, 'w') as outfile:
-    #         json.dump(merged_data, outfile, indent=4)
-    #
-    #
-    #     data1 = load_json_file(f'{directory_path}\\train_{kgs[0]}_{dataset}_with_concept.json')
-    #     data2 = load_json_file(f'{directory_path}\\train_{kgs[1]}_{dataset}_with_concept.json')
-    #
-    #     merged_data = merge_records(data1, data2,type="train",kg1=kgs[0],kg2 = kgs[1])
-    #     output_file_path = os.path.join(directory_path, f"train.json")
-    #     with open(output_file_path, 'w') as outfile:
-    #         json.dump(merged_data, outfile, indent=4)
+    kgs = ["primekg","hetionet"]
+    for dataset in datasets:
+        directory_path = f"{root_folder}/Pre_Processed_Datasets/{dataset}/3_extracted_concepts_relations"
+    
+        # Load data from files
+        data1 = load_json_file(f'{directory_path}\\test_{kgs[0]}_{dataset}_with_relations.json')
+        data2 = load_json_file(f'{directory_path}\\test_{kgs[1]}_{dataset}_with_relations.json')
+    
+        # Merge data
+        merged_data = merge_records(data1, data2,type="test",kg1=kgs[0],kg2 = kgs[1])
+        output_file_path = os.path.join(directory_path, f"test.json")
+        with open(output_file_path, 'w') as outfile:
+            json.dump(merged_data, outfile, indent=4)
+    
+    
+        data1 = load_json_file(f'{directory_path}\\train_{kgs[0]}_{dataset}_with_relations.json')
+        data2 = load_json_file(f'{directory_path}\\train_{kgs[1]}_{dataset}_with_relations.json')
+    
+        merged_data = merge_records(data1, data2,type="train",kg1=kgs[0],kg2 = kgs[1])
+        output_file_path = os.path.join(directory_path, f"train.json")
+        with open(output_file_path, 'w') as outfile:
+            json.dump(merged_data, outfile, indent=4)
             
 if __name__ == "__main__":
     relation_extraction()
