@@ -7,7 +7,7 @@ from neo4j import GraphDatabase
 from tqdm import tqdm
 import torch
 
-root_folder = "."
+root_folder = ".."
 
 
 def connect_to_neo4j(uri, username, password):
@@ -39,8 +39,8 @@ def _get_node_details(driver, node_name,node_name_attribute,allowed_attributes):
                     "relation": record["relation"],
                     "target_nodes": node
                 }
-                print(f"source: {node_name} relation: {record["relation"]} target_nodes:{node}" )
-            triples.append(triple)
+                # print(f"source: {node_name} relation: {record["relation"]} target_nodes:{node}" )
+                triples.append(triple)
 
     return {"attributes": node_attributes, "triples": triples}
 
@@ -135,7 +135,7 @@ def merge_records(data1, data2,type="test",kg1 ="primekg", kg2 = "hetionet"):
     for ind1,question in enumerate(data1):
         item = data1[ind1]
         item2 = data2[ind1]
-        item[f"{kg2}_concepts_context"] = item2[f"{kg2}_concepts_context"]
-        item[f"{kg2}_concepts_question"] = item2[f"{kg2}_concepts_question"]
+        item[f"{kg2}_concepts_context_with_kg_data"] = item2[f"{kg2}_concepts_context_with_kg_data"]
+        item[f"{kg2}_concepts_question_with_kg_data"] = item2[f"{kg2}_concepts_question_with_kg_data"]
         merged_data.append(item)
     return merged_data
