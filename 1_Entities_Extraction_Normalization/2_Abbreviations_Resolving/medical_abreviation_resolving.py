@@ -8,7 +8,6 @@ from tqdm import tqdm
 list_datasets = ["PubmedQA","BioASQ"]#,
 
 
-
 def process_json_file(file_path, output_directory):
     with open(file_path, 'r', encoding='utf-8') as file:
         data = json.load(file)
@@ -17,10 +16,10 @@ def process_json_file(file_path, output_directory):
             context = item['context']
             question = item['question']
            
-            new_question,resolved_question_abbreviations = expand_abbreviations(question)
-            print(resolved_question_abbreviations)
-            new_context,resolved_context_abbreviations = expand_abbreviations(context)
+            new_question,resolved_question_abbreviations = process_abbreviations(question)
+            new_context,resolved_context_abbreviations = process_abbreviations(context)
             print(resolved_context_abbreviations)
+            print(resolved_question_abbreviations)
             
             item['context_abr_exapnded'] = new_context
             item['question_abr_exapnded'] = new_question

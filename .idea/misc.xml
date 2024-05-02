@@ -3,5 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Bert_For_Biomedicine" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="Bert_For_Biomedicine" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Text_Understanding_Env" project-jdk-type="Python SDK" />
 </project>

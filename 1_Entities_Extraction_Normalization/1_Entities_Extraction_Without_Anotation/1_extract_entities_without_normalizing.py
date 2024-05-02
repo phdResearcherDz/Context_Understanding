@@ -5,14 +5,16 @@ from tqdm import tqdm
 
 list_datasets = ["PubmedQA","BioASQ"]#,
 # nlp = spacy.load("en_core_sci_sm")
-nlp = spacy.load("en_ner_bionlp13cg_md")
+nlp = spacy.load("en_core_sci_scibert")
+
+
+
+
 
 def extract_entities(context):
     if context is None:
         return None
     doc = nlp(context)
-    for ent in doc.ents:
-        print(f"{ent.text} : {ent.label_}")
     medical_entities = [ent.text for ent in doc.ents]
     return medical_entities
 
@@ -43,8 +45,8 @@ def process_json_file(file_path, output_directory):
 
 if __name__ == '__main__':
     for dataset in list_datasets:
-        path_dataset = f"../Pre_Processed_Datasets/{dataset}"
-        output_directory = os.path.join(path_dataset, '3_extracted_entities_v2')
+        path_dataset = f"Pre_Processed_Datasets/{dataset}"
+        output_directory = os.path.join(path_dataset, '3_extracted_entities')
 
         # Process each JSON file in the directory
         for filename in os.listdir(path_dataset):
