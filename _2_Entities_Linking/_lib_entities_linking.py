@@ -16,6 +16,7 @@ model = AutoModel.from_pretrained("GanjinZero/UMLSBert_ENG")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
+root_folder = "../"
 # Function to connect to Neo4j Database
 def connect_to_neo4j(uri, username, password):
     return GraphDatabase.driver(uri, auth=(username, password))
@@ -109,8 +110,6 @@ def process_json_livenshtien(file_path, df_nodes, kg_name, node_name_attribute):
                 if dist < min_distance:
                     min_distance = dist
                     closest_name = node_name
-            print(min_distance)
-            print(f'{entity_name}:{closest_name}')
             return closest_name
 
         # Context entities matching
@@ -124,8 +123,7 @@ def process_json_livenshtien(file_path, df_nodes, kg_name, node_name_attribute):
             item[f"{kg_name}_concepts_question"][entity_name] = closest_node
 
         new_data.append(item)
-        print(item[f"{kg_name}_concepts_context"])
-        print(item[f"{kg_name}_concepts_question"])
+
 
     return new_data
 
@@ -162,7 +160,7 @@ def process_json_ngram(file_path, df_nodes, kg_name, node_name_attribute):
                 if max_similarity_score > threshold:
                     most_similar_node = df_nodes[node_name_attribute].iloc[max_index]
                     item[f"{kg_name}_concepts_context"][entity_name] = most_similar_node
-                    print(f"{entity_name}:{most_similar_node}")
+
 
         # Process question entities
         if question_entities:
@@ -175,7 +173,7 @@ def process_json_ngram(file_path, df_nodes, kg_name, node_name_attribute):
                 if max_similarity_score > threshold:
                     most_similar_node = df_nodes[node_name_attribute].iloc[max_index]
                     item[f"{kg_name}_concepts_question"][entity_name] = most_similar_node
-                    print(f"{entity_name}:{most_similar_node}")
+
 
         new_data.append(item)
 
@@ -213,19 +211,17 @@ def process_json(file_path, df_nodes, kg_name, node_name_attribute):
 
         new_data.append(item)
 
-        print(item[f"{kg_name}_concepts_context"])
-        print(item[f"{kg_name}_concepts_question"])
     return new_data
 
 def process_dataset(dataset, df_nodes, kg_name, node_name_attribute):
-    directory_path = f'Pre_Processed_Datasets/{dataset}/1_extracted_entities_with_metadata/'
+    directory_path = f'{root_folder}Pre_Processed_Datasets/{dataset}/1_extracted_entities_with_metadata/'
     for json_file_path in glob.glob(directory_path + '*.json'):
         # new_data = process_json(json_file_path, df_nodes,kg_name,node_name_attribute)
         new_data = process_json_ngram(json_file_path, df_nodes,kg_name,node_name_attribute)
 
         # Create new file path
         directory, filename = os.path.split(json_file_path)
-        new_directory = f"Pre_Processed_Datasets/{dataset}/2_kg_linked_entities"
+        new_directory = f"{root_folder}Pre_Processed_Datasets/{dataset}/2_kg_linked_entities"
         os.makedirs(new_directory,exist_ok=True)
 
         new_filename = os.path.splitext(filename)[0] + f"_{kg_name}_{dataset}_with_concept.json"

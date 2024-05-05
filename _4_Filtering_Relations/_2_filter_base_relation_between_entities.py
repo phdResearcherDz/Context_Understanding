@@ -1,6 +1,6 @@
 from _lib_relation_filter_qc import *
 
-datasets = ["BioASQ"]  # "BioASQ", "
+datasets = ["BioASQ","PubmedQA"]  # , "
 
 
 def ProcessPrimeKG():
@@ -13,13 +13,13 @@ def ProcessHetionet():
         process_dataset(dataset, kg_name="hetionet")
 
 
-def filter_relations():
-    ProcessPrimeKG()
-    ProcessHetionet()
+def filter_relations_qc():
+    # ProcessPrimeKG()
+    # ProcessHetionet()
 
     kgs = ["primekg","hetionet"]
     for dataset in datasets:
-        directory_path = f"{root_folder}/Pre_Processed_Datasets/{dataset}/4_extracted_concepts_relations_filtered"
+        directory_path = f"{root_folder}/Pre_Processed_Datasets/{dataset}/4_extracted_concepts_relations_filtered_qc"
     
         # Load data from files
         data1 = load_json_file(f'{directory_path}\\test_{kgs[0]}_{dataset}_with_relations_filtered.json')
@@ -42,4 +42,4 @@ def filter_relations():
 
 
 if __name__ == "__main__":
-    filter_relations()
+    filter_relations_qc()

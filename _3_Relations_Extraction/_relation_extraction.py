@@ -1,6 +1,6 @@
 from _lib_relation_extraction import *
 
-datasets = ["BioASQ"] #"PubmedQA"
+datasets = ["BioASQ","PubmedQA"] #
 
 
 def ProcessPrimeKG():

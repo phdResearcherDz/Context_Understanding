@@ -7,7 +7,7 @@ from neo4j import GraphDatabase
 from tqdm import tqdm
 import torch
 
-root_folder = "."
+root_folder = ".."
 
 
 def connect_to_neo4j(uri, username, password):

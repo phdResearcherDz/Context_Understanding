@@ -63,7 +63,7 @@ def entities_linking():
     print("*"*10)
     kgs = ["primekg","hetionet"]
     for dataset in datasets:
-        directory_path = f"Pre_Processed_Datasets/{dataset}/2_kg_linked_entities"
+        directory_path = f"{root_folder}Pre_Processed_Datasets/{dataset}/2_kg_linked_entities"
         
         # Load data from files
         data1 = load_json_file(f'{directory_path}\\test_{kgs[0]}_{dataset}_with_concept.json')

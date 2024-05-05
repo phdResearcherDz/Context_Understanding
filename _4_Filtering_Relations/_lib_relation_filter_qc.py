@@ -7,11 +7,7 @@ from neo4j import GraphDatabase
 from tqdm import tqdm
 import torch
 
-root_folder = "."
-
-
-def connect_to_neo4j(uri, username, password):
-    return GraphDatabase.driver(uri, auth=(username, password))
+root_folder = ".."
 
 def get_all_concepts(context_ent,question_ent):
     allConcepts = []
@@ -43,6 +39,7 @@ def process_json(json_file_path, kg_name):
             for triple in triples:
                 if triple["target_nodes"] in all_concepts:
                     relevant_relations_filtered_qc.append(triple)
+
         #select relevant relations from question
         for concept in question_medical_concepts_relations:
             triples = question_medical_concepts_relations[concept]["triples"]
@@ -62,7 +59,7 @@ def process_dataset(dataset, kg_name):
 
         # Create new file path
         directory, filename = os.path.split(json_file_path)
-        new_directory = f"{root_folder}/Pre_Processed_Datasets/{dataset}/4_extracted_concepts_relations_filtered"
+        new_directory = f"{root_folder}/Pre_Processed_Datasets/{dataset}/4_extracted_concepts_relations_filtered_qc"
         os.makedirs(new_directory,exist_ok=True)
 
         new_filename = os.path.splitext(filename)[0] + f"_{kg_name}_{dataset}_with_relations_filtered.json"
