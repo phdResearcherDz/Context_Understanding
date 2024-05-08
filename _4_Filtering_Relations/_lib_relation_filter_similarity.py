@@ -71,14 +71,7 @@ def get_relevant_triples(question, triples, top_k=5, batch_size=32):
         return []
 
     triple_score_pairs = sorted(zip(triples_map, scores), key=lambda x: x[1], reverse=True)
-    i = 0
-    # print(question)
-    # for triple, score in triple_score_pairs:
-    #     print(triple)
-    #     print(score)
-    #     if i == top_k:
-    #         break
-    #     i = i +1
+
 
     relevants =  [triple for triple, score in triple_score_pairs[:top_k]]
 

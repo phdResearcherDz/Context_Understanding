@@ -1,3 +1,4 @@
+import re
 from enum import Enum
 
 from transformers import AutoTokenizer, AutoModel
@@ -260,7 +261,7 @@ def get_item_metadata_with_deffinition_relation_summarize(context_entities, ques
             if relations_text:
                 relevant_text = f"Relations: {relations_text.strip()}"
 
-    return summarize_text(relevant_text,context)
+    return summarize_text(relations_text,context)
 
 def call_metadata_method(method, context_entities, question_entities, primekg_relations, hetionet_relations,context):
     match method:
@@ -280,7 +281,13 @@ def call_metadata_method(method, context_entities, question_entities, primekg_re
             raise ValueError("Invalid method")
 
 
-
+def normalize_context(context,entities):
+    for entity in entities:
+        for key, value in entity.items():
+            concept_origin = key
+            concept_normalized = value["canonical_name"]
+            context = re.sub(r'\b' + re.escape(concept_origin) + r'\b', concept_normalized, context)
+    return  context
 
 def process_json(json_file_path,method,version_filter,kg):
     with open(json_file_path, 'r') as file:
@@ -310,9 +317,13 @@ def process_json(json_file_path,method,version_filter,kg):
 
         metadata = call_metadata_method(method, context_entities, question_entities, primekg_relations,
                                         hetionet_relations,context)
-
+        original_question = item["question"]
+        item["context"] = normalize_context(item["context"],context_entities)
+        item["question"] = normalize_context(item["question"],context_entities)
+        item["context"] = normalize_context(item["context"],context_entities)
+        metadata = normalize_context(metadata,context_entities)
         new_item = {
-            "original_question":  item["question"],
+            "original_question":original_question,
             "question": item["question"],
             "context": item["context"],
             "answer": item["answer"],
@@ -330,7 +341,7 @@ def process_dataset(dataset,type_formating,version_filter,kg="both"):
 
         # Create new file path
         directory, filename = os.path.split(json_file_path)
-        new_directory = f"{root_folder}/Pre_Processed_Datasets/{dataset}/5_formated_metadata_{type_formating}_v{version_filter}_{kg}"
+        new_directory = f"{root_folder}/Pre_Processed_Datasets/{dataset}/5_formated_metadata_{type_formating}_v{version_filter}_{kg}_normalized"
         os.makedirs(new_directory,exist_ok=True)
 
         new_filename = os.path.splitext(filename)[0] + f".json"

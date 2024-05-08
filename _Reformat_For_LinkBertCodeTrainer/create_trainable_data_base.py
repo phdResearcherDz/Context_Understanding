@@ -2,8 +2,8 @@ import os
 import json
 
 
-def process_dataset(root_path, dataset_name, folder_prefix):
-    dataset_folders = [folder for folder in os.listdir(root_path) if folder.startswith(folder_prefix)]
+def process_dataset(root_path, dataset_name,folder_prefix):
+    dataset_folders = [folder for folder in os.listdir(root_path)  if folder.startswith(folder_prefix)]
     jsonl_file_path = os.path.join(root_path,"dev.json")
     list_folder_names = []
     for folder in dataset_folders:
@@ -40,12 +40,11 @@ def process_dataset(root_path, dataset_name, folder_prefix):
             for idx, item in enumerate(data):
                 id_str = f"converted_{idx}"
                 sentence1 = item["question"]
-                sentence2 = f'{item["context"]}[SEP]{item["metadata"]}'
+                sentence2 = f'{item["context"]}'
                 label = item["answer"]
                 if label not in ["yes","no","maybe"]:
                     continue
                 json_obj = {
-                    "original_question":item["original_question"],
                     "id": id_str,
                     "sentence1": sentence1,
                     "sentence2": sentence2,
@@ -61,7 +60,7 @@ def process_dataset(root_path, dataset_name, folder_prefix):
                 updated_train_data = []
                 dev_data = []
                 for item in converted_data:
-                    if item["original_question"] in dev_questions:
+                    if item["sentence1"] in dev_questions:
                         dev_data.append(json.dumps(item))
                     else:
                         updated_train_data.append(json.dumps(item))
@@ -81,5 +80,4 @@ def process_dataset(root_path, dataset_name, folder_prefix):
 root = "../Pre_Processed_Datasets/"
 
 # Call the function for each dataset
-process_dataset(os.path.join(root, "BioASQ"), "BioASQ", "5_")
-process_dataset(os.path.join(root, "PubmedQA"), "PubmedQA", "5_")
+process_dataset(os.path.join(root, "base"), "PubmedQA","P")
