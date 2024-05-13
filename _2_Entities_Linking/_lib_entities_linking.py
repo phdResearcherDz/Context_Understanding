@@ -16,7 +16,7 @@ model = AutoModel.from_pretrained("GanjinZero/UMLSBert_ENG")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
-root_folder = "../"
+root_folder = "./"
 # Function to connect to Neo4j Database
 def connect_to_neo4j(uri, username, password):
     return GraphDatabase.driver(uri, auth=(username, password))
