@@ -17,12 +17,12 @@ device = 0 if torch.cuda.is_available() else -1  # -1 means CPU
 summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=device)
 
 class MetadataMethod(Enum):
-    WITH_DEFINITION_RELATION = 1
-    WITH_RELATION = 2
+    # WITH_DEFINITION_RELATION = 1
+    # WITH_RELATION = 2
     # WITH_RELATION_SUMMARIZE = 3
     # WITH_DEFINITION = 4
     # WITH_DEFINITION_SUMMARIZE = 5
-    # WITH_DEFINITION_RELATION_SUMMARIZE = 6
+    WITH_DEFINITION_RELATION_SUMMARIZE = 6
 
 def get_all_concepts_with_definition(context_ent, question_ent):
     allConcepts = {}
@@ -95,6 +95,7 @@ def get_item_metadata_with_deffinition_relation(context_entities, question_entit
     for source, relations in relations_dict.items():
         relations_text += f"{source} has relations: {', '.join(relations)}. "
 
+    relevant_text = ""
     # Compose the final relevant text
     if not definitions_text and not relations_text:
         relevant_text = ""
@@ -248,7 +249,7 @@ def get_item_metadata_with_deffinition_relation_summarize(context_entities, ques
     relations_text = ""
     for source, relations in relations_dict.items():
         relations_text += f"{source} has relations: {', '.join(relations)}. "
-
+    relevant_text = ""
     # Compose the final relevant text
     if not definitions_text and not relations_text:
         relevant_text = ""
@@ -261,22 +262,22 @@ def get_item_metadata_with_deffinition_relation_summarize(context_entities, ques
             if relations_text:
                 relevant_text = f"Relations: {relations_text.strip()}"
 
-    return summarize_text(relations_text,context)
+    return summarize_text(relevant_text,context)
 
 def call_metadata_method(method, context_entities, question_entities, primekg_relations, hetionet_relations,context):
     match method:
-        case MetadataMethod.WITH_DEFINITION_RELATION:
-            return get_item_metadata_with_deffinition_relation(context_entities, question_entities, primekg_relations, hetionet_relations)
-        case MetadataMethod.WITH_RELATION:
-            return get_item_metadata_with_relation(context_entities, question_entities, primekg_relations, hetionet_relations)
+        # case MetadataMethod.WITH_DEFINITION_RELATION:
+        #     return get_item_metadata_with_deffinition_relation(context_entities, question_entities, primekg_relations, hetionet_relations)
+        # case MetadataMethod.WITH_RELATION:
+        #     return get_item_metadata_with_relation(context_entities, question_entities, primekg_relations, hetionet_relations)
         # case MetadataMethod.WITH_RELATION_SUMMARIZE:
         #     return get_item_metadata_with_relation_summurize(context_entities, question_entities, primekg_relations, hetionet_relations,context)
-        # # case MetadataMethod.WITH_DEFINITION:
+        # case MetadataMethod.WITH_DEFINITION:
         #     return get_item_metadata_with_deffinition(context_entities, question_entities, primekg_relations, hetionet_relations)
         # case MetadataMethod.WITH_DEFINITION_SUMMARIZE:
         #     return get_item_metadata_with_deffinition_summarize(context_entities, question_entities, primekg_relations, hetionet_relations,context)
-        # # case MetadataMethod.WITH_DEFINITION_RELATION_SUMMARIZE:
-        #     return get_item_metadata_with_deffinition_relation_summarize(context_entities, question_entities, primekg_relations, hetionet_relations,context)
+        case MetadataMethod.WITH_DEFINITION_RELATION_SUMMARIZE:
+            return get_item_metadata_with_deffinition_relation_summarize(context_entities, question_entities, primekg_relations, hetionet_relations,context)
         case _:
             raise ValueError("Invalid method")
 
