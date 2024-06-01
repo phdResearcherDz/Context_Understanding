@@ -1,6 +1,6 @@
 from _lib_relation_extraction import *
 
-datasets = ["BioASQ","PubmedQA"] #
+datasets = ["medqa_usmle_hf"] #"BioASQ","PubmedQA"
 
 
 def ProcessPrimeKG():
@@ -55,6 +55,15 @@ def relation_extraction():
         # Merge data
         merged_data = merge_records(data1, data2,type="test",kg1=kgs[0],kg2 = kgs[1])
         output_file_path = os.path.join(directory_path, f"test.json")
+        with open(output_file_path, 'w') as outfile:
+            json.dump(merged_data, outfile, indent=4)
+
+        data1 = load_json_file(f'{directory_path}\\dev_{kgs[0]}_{dataset}_with_relations.json')
+        data2 = load_json_file(f'{directory_path}\\dev_{kgs[1]}_{dataset}_with_relations.json')
+
+        # Merge data
+        merged_data = merge_records(data1, data2, type="dev", kg1=kgs[0], kg2=kgs[1])
+        output_file_path = os.path.join(directory_path, f"dev.json")
         with open(output_file_path, 'w') as outfile:
             json.dump(merged_data, outfile, indent=4)
     

@@ -17,11 +17,11 @@ summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=d
 
 class MetadataMethod(Enum):
     # WITH_DEFINITION_RELATION = 1
-    # WITH_RELATION = 2
+    WITH_RELATION = 2
     # WITH_RELATION_SUMMARIZE = 3
     # WITH_DEFINITION = 4
     # WITH_DEFINITION_SUMMARIZE = 5
-    WITH_DEFINITION_RELATION_SUMMARIZE = 6
+    # WITH_DEFINITION_RELATION_SUMMARIZE = 6
 
 def get_all_concepts_with_definition(context_ent, question_ent):
     allConcepts = {}
@@ -266,16 +266,16 @@ def call_metadata_method(method, context_entities, question_entities, primekg_re
     match method:
         # case MetadataMethod.WITH_DEFINITION_RELATION:
         #     return get_item_metadata_with_deffinition_relation(context_entities, question_entities, primekg_relations, hetionet_relations)
-        # case MetadataMethod.WITH_RELATION:
-        #     return get_item_metadata_with_relation(context_entities, question_entities, primekg_relations, hetionet_relations)
+        case MetadataMethod.WITH_RELATION:
+            return get_item_metadata_with_relation(context_entities, question_entities, primekg_relations, hetionet_relations)
         # case MetadataMethod.WITH_RELATION_SUMMARIZE:
         #     return get_item_metadata_with_relation_summurize(context_entities, question_entities, primekg_relations, hetionet_relations,context)
         # case MetadataMethod.WITH_DEFINITION:
         #     return get_item_metadata_with_deffinition(context_entities, question_entities, primekg_relations, hetionet_relations)
         # case MetadataMethod.WITH_DEFINITION_SUMMARIZE:
         #     return get_item_metadata_with_deffinition_summarize(context_entities, question_entities, primekg_relations, hetionet_relations,context)
-        case MetadataMethod.WITH_DEFINITION_RELATION_SUMMARIZE:
-            return get_item_metadata_with_deffinition_relation_summarize(context_entities, question_entities, primekg_relations, hetionet_relations,context)
+        # case MetadataMethod.WITH_DEFINITION_RELATION_SUMMARIZE:
+        #     return get_item_metadata_with_deffinition_relation_summarize(context_entities, question_entities, primekg_relations, hetionet_relations,context)
         case _:
             raise ValueError("Invalid method")
 
@@ -322,11 +322,71 @@ def process_json(json_file_path,method,version_filter,kg):
         
         new_data.append(new_item)
     return new_data
+
+
+def process_json_medqa(json_file_path, method, version_filter, kg):
+    with open(json_file_path, 'r') as file:
+        data = json.load(file)
+    print(json_file_path)
+    new_data = list()
+    for item in tqdm(data):
+        metadata = ""
+        context = item["context"]
+        context_entities = item["context_entities"]
+        question_entities = item["question_entities"]
+        if version_filter == "similarity":
+            version_filter = "sm"
+
+        match kg:
+            case "both":
+                primekg_relations = item[f"primekg_relevant_relations_{version_filter}"]
+                hetionet_relations = item[f"hetionet_relevant_relations_{version_filter}"]
+            case "primekg":
+                primekg_relations = item[f"primekg_relevant_relations_{version_filter}"]
+                hetionet_relations = []
+            case "hetionet":
+                primekg_relations = []
+                hetionet_relations = item[f"hetionet_relevant_relations_{version_filter}"]
+            case _:
+                raise ValueError("Invalid method")
+
+        metadata = call_metadata_method(method, context_entities, question_entities, primekg_relations,
+                                        hetionet_relations, context)
+        item["metadata"] = metadata
+
+        # Specify keys to remove
+        keys_to_remove = [
+            f"primekg_relevant_relations_{version_filter}",
+            f"hetionet_relevant_relations_{version_filter}",
+            f"primekg_concepts_context",
+            f"hetionet_concepts_context",
+            f"primekg_concepts_question",
+            f"hetionet_concepts_question",
+            f"primekg_concepts_question_with_kg_data",
+            f"hetionet_concepts_question_with_kg_data",
+            f"primekg_concepts_context_with_kg_data",
+            f"hetionet_concepts_context_with_kg_data"
+        ]
+
+        # Create a new dictionary without specified keys
+        filtered_data = {key: value for key, value in item.items() if key not in keys_to_remove}
+
+        # Reassign filtered data back to item
+        item = filtered_data
+
+        # Copy the original question if it exists
+        item["original_question"] = item.get("question", "")
+
+        new_data.append(item)
+    return new_data
+
 # kg = > Both, primekg, hetionet
 def process_dataset(dataset,type_formating,version_filter,kg="both"):
     directory_path = f'{root_folder}/Pre_Processed_Datasets/{dataset}/4_extracted_concepts_relations_filtered_{version_filter}/'
     for json_file_path in glob.glob(directory_path + '*.json'):
-        new_data = process_json(json_file_path,type_formating,version_filter,kg)
+
+        # new_data = process_json(json_file_path,type_formating,version_filter,kg)
+        new_data = process_json_medqa(json_file_path,type_formating,version_filter,kg)
 
         # Create new file path
         directory, filename = os.path.split(json_file_path)
