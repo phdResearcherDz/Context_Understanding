@@ -1,6 +1,6 @@
-from _lib_relation_filter_similarity import *
+from _4_Filtering_Relations._lib_relation_filter_similarity import *
 
-datasets = ["medqa_usmle_hf"]#"BioASQ", "PubmedQA"
+datasets = ["BioASQ2024"]#"BioASQ", "PubmedQA"
 
 
 def ProcessPrimeKG():

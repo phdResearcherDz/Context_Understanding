@@ -8,7 +8,7 @@ import pandas as pd
 from neo4j import GraphDatabase
 from tqdm import tqdm
 import torch
-from transformers import  pipeline
+from transformers import pipeline
 
 root_folder = ".."
 # Load the summarization pipeline and set it to use the GPU if available
@@ -16,7 +16,7 @@ device = 0 if torch.cuda.is_available() else -1  # -1 means CPU
 summarizer = pipeline("summarization", model="facebook/bart-large-cnn", device=device)
 
 class MetadataMethod(Enum):
-    # WITH_DEFINITION_RELATION = 1
+    WITH_DEFINITION_RELATION = 1
     WITH_RELATION = 2
     # WITH_RELATION_SUMMARIZE = 3
     # WITH_DEFINITION = 4
@@ -264,14 +264,14 @@ def get_item_metadata_with_deffinition_relation_summarize(context_entities, ques
 
 def call_metadata_method(method, context_entities, question_entities, primekg_relations, hetionet_relations,context):
     match method:
-        # case MetadataMethod.WITH_DEFINITION_RELATION:
-        #     return get_item_metadata_with_deffinition_relation(context_entities, question_entities, primekg_relations, hetionet_relations)
+        case MetadataMethod.WITH_DEFINITION_RELATION:
+            return get_item_metadata_with_deffinition_relation(context_entities, question_entities, primekg_relations, hetionet_relations)
         case MetadataMethod.WITH_RELATION:
             return get_item_metadata_with_relation(context_entities, question_entities, primekg_relations, hetionet_relations)
         # case MetadataMethod.WITH_RELATION_SUMMARIZE:
         #     return get_item_metadata_with_relation_summurize(context_entities, question_entities, primekg_relations, hetionet_relations,context)
-        # case MetadataMethod.WITH_DEFINITION:
-        #     return get_item_metadata_with_deffinition(context_entities, question_entities, primekg_relations, hetionet_relations)
+        case MetadataMethod.WITH_DEFINITION:
+            return get_item_metadata_with_deffinition(context_entities, question_entities, primekg_relations, hetionet_relations)
         # case MetadataMethod.WITH_DEFINITION_SUMMARIZE:
         #     return get_item_metadata_with_deffinition_summarize(context_entities, question_entities, primekg_relations, hetionet_relations,context)
         # case MetadataMethod.WITH_DEFINITION_RELATION_SUMMARIZE:

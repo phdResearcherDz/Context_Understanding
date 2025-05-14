@@ -1,8 +1,8 @@
 import json
 
-dataset = "BioASQ"
+dataset = "BioASQ2024"
 root = ".."
-for type in ["train","test"]:
+for type in ["train","test","dev"]:
     type_ = type
     path = f"{root}\\Pre_Processed_Datasets\\{dataset}\\"
     # Load data from JSON file
@@ -29,6 +29,6 @@ for type in ["train","test"]:
     # Write to a JSONL file
     with open(f"{type_}.json", "w") as f:
         f.write("\n".join(converted_data))
-    if type_ == "test":
-        with open(f"dev.json", "w") as f:
-            f.write("\n".join(converted_data))
+    # if type_ == "test":
+    #     with open(f"dev.json", "w") as f:
+    #         f.write("\n".join(converted_data))

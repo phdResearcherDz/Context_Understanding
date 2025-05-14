@@ -12,12 +12,15 @@ def extract_data(json_file):
         context = ", ".join(snippet["text"] for snippet in question["snippets"])
         answer = question.get("exact_answer", None)
         type = question["type"]
-        extracted_data.append({
-            "question": question_text,
-            "context": context,
-            "answer": answer,
-            "type": type,
-        })
+        id = question["id"]
+        if type == "yesno":
+            extracted_data.append({
+                "id": id,
+                "question": question_text,
+                "context": context,
+                "answer": answer,
+                "type": type,
+            })
 
     return extracted_data
 
@@ -26,7 +29,7 @@ def extract_train_data(path):
     extracted_info_train = extract_data(path)
 
     # To save the extracted data as a new JSON file
-    with open("../Pre_Processed_Datasets/BioASQ/train_.json", "w",encoding='utf-8') as outfile:
+    with open("../../Pre_Processed_Datasets/BioASQ2024/train.json", "w",encoding='utf-8') as outfile:
         json.dump(extracted_info_train, outfile, indent=4)
 
 def process_folder(folder_path):
@@ -48,5 +51,5 @@ def extract_test_data(path):
         json.dump(consolidated_data, outfile, indent=4)
 
 if __name__ == '__main__':
-    extract_train_data("../../Datasets/BioASQ 11B/train/training11b.json")
-    extract_test_data("../../Datasets/BioASQ 11B/test")
+    extract_train_data("../../Pre_Processed_Datasets/raw_datasets/BioASQ 2024/training12b_new.json")
+    extract_test_data("../../Pre_Processed_Datasets/raw_datasets/BioASQ 2024/test")

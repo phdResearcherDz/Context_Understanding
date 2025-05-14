@@ -7,7 +7,7 @@ from neo4j import GraphDatabase
 from tqdm import tqdm
 import torch
 
-root_folder = ".."
+root_folder = "../"
 
 
 def connect_to_neo4j(uri, username, password):
@@ -49,7 +49,7 @@ def get_node_details(driver, node_name, node_name_attribute, allowed_attributes)
     with driver.session() as session:
         # Query to get related triples where the node is the source
         result = session.run(
-            "MATCH (n {node_name: $node_name})-[r]-(m) RETURN type(r) as relation, collect(m." + node_name_attribute + ") as nodes",
+            "MATCH (n {"+node_name_attribute+": $node_name})-[r]-(m) RETURN type(r) as relation, collect(m." + node_name_attribute + ") as nodes",
             node_name=node_name)
 
         # Process the result into the desired format
@@ -78,20 +78,20 @@ def process_json(driver,json_file_path, kg_name, node_name_attribute,allowed_att
 
     new_data = list()
     for item in tqdm(data):
-        question_medical_concepts_primekg = item.get(f"{kg_name}_concepts_context", '')
-        context_medical_concepts_primekg = item.get(f"{kg_name}_concepts_context", '')
+        question_medical_concepts = item.get(f"{kg_name}_concepts_question", '')
+        context_medical_concepts = item.get(f"{kg_name}_concepts_context", '')
 
         question_with_kg = dict()
         context_with_kg = dict()
-        if question_medical_concepts_primekg:
-            for concept in question_medical_concepts_primekg:
-                node = question_medical_concepts_primekg[concept]
+        if question_medical_concepts:
+            for concept in question_medical_concepts:
+                node = question_medical_concepts[concept]
                 extracted_data_question = get_node_details(driver,node,node_name_attribute,allowed_attributes)
                 question_with_kg[concept] = extracted_data_question
 
-        if context_medical_concepts_primekg:
-            for concept in context_medical_concepts_primekg:
-                node = context_medical_concepts_primekg[concept]
+        if context_medical_concepts:
+            for concept in context_medical_concepts:
+                node = context_medical_concepts[concept]
                 extracted_data_context = get_node_details(driver, node,node_name_attribute,allowed_attributes)
                 context_with_kg[concept] = extracted_data_context
 
@@ -135,7 +135,11 @@ def merge_records(data1, data2,type="test",kg1 ="primekg", kg2 = "hetionet"):
     for ind1,question in enumerate(data1):
         item = data1[ind1]
         item2 = data2[ind1]
+        # item[f"{kg1}_concepts_context_with_kg_data"] = item[f"{kg1}_concepts_context_with_kg_data"]
+        # item[f"{kg1}_concepts_question_with_kg_data"] = item[f"{kg1}_concepts_question_with_kg_data"]
+
         item[f"{kg2}_concepts_context_with_kg_data"] = item2[f"{kg2}_concepts_context_with_kg_data"]
         item[f"{kg2}_concepts_question_with_kg_data"] = item2[f"{kg2}_concepts_question_with_kg_data"]
+
         merged_data.append(item)
     return merged_data

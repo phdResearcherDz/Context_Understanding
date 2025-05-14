@@ -16,7 +16,7 @@ model = AutoModel.from_pretrained("GanjinZero/UMLSBert_ENG")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
-root_folder = "./"
+root_folder = "../"
 # Function to connect to Neo4j Database
 def connect_to_neo4j(uri, username, password):
     return GraphDatabase.driver(uri, auth=(username, password))
@@ -218,7 +218,7 @@ def process_dataset(dataset, df_nodes, kg_name, node_name_attribute):
     for json_file_path in glob.glob(directory_path + '*.json'):
         # new_data = process_json(json_file_path, df_nodes,kg_name,node_name_attribute)
         new_data = process_json_ngram(json_file_path, df_nodes,kg_name,node_name_attribute)
-
+        print(json_file_path)
         # Create new file path
         directory, filename = os.path.split(json_file_path)
         new_directory = f"{root_folder}Pre_Processed_Datasets/{dataset}/2_kg_linked_entities"

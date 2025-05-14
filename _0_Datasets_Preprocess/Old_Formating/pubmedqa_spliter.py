@@ -15,7 +15,7 @@ matching_data = {key: first_data[key] for key in second_data if key in first_dat
 non_matching_data = {key: first_data[key] for key in first_data if key not in second_data}
 
 # Save the matching elements to a new file
-with open('test.json', 'w') as file:
+with open('../../Pre_Processed_Datasets/BioASQ2024/test.json', 'w') as file:
     json.dump(matching_data, file, indent=4)
 
 # Save the non-matching elements to another new file

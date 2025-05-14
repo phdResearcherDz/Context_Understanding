@@ -57,5 +57,6 @@ def process_dataset(root_path, dataset_name, folder_prefix):
 root = "../Pre_Processed_Datasets/"
 
 # Call the function for each dataset
-process_dataset(os.path.join(root, "BioASQ"), "BioASQ", "5_")
+# process_dataset(os.path.join(root, "BioASQ2024"), "BioASQ2024", "5_")
+process_dataset(os.path.join(root, "BioASQ_BLURB"), "BioASQ_BLURB", "5_")
 process_dataset(os.path.join(root, "PubmedQA"), "PubmedQA", "5_")

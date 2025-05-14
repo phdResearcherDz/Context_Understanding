@@ -16,7 +16,7 @@ from transformers import AutoTokenizer, AutoModel
 
 # relevant_types = {"T047", "T191", "T061", "T060", "T074", "T058", "T190", "T020"}
 # Define relevant biomedical labels
-list_datasets = ["medqa_usmle_hf"]#"PubmedQA","BioASQ"
+list_datasets = ["BioASQ2024"]#"PubmedQA","BioASQ"
 relevant_labels = {
     "AMINO_ACID", "ANATOMICAL_SYSTEM", "CANCER", "CELL", "CELLULAR_COMPONENT",
    "GENE_OR_GENE_PRODUCT", "IMMATERIAL_ANATOMICAL_ENTITY",

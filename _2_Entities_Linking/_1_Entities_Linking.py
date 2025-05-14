@@ -4,7 +4,7 @@ import threading
 import pandas as pd
 import re
 
-datasets = ["medqa_usmle_hf"]#,"PubmedQA""BioASQ","PubmedQA"
+datasets = ["BioASQ2024"]#,"PubmedQA""BioASQ","PubmedQA"
 
 def ProcessPrimeKG():
     uri = "bolt://localhost:7687"
