@@ -9,7 +9,7 @@ datasets = ["BioASQ2024"]#,"PubmedQA""BioASQ","PubmedQA"
 def ProcessPrimeKG():
     uri = "bolt://localhost:7687"
     username = "neo4j"
-    password = "kira.@1830"
+    password = ""
 
     driver = connect_to_neo4j(uri, username, password)
     df_nodes = fetch_nodes(driver)
