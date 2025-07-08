@@ -127,7 +127,7 @@ ollama run gemma:9b
 ## 📌 Resources
 
 - [Hetionet](https://het.io/)
-- [PrimeKG](https://github.com/snap-stanford/primekg)
+- [PrimeKG](https://zitniklab.hms.harvard.edu/projects/PrimeKG/)
 - [UMLS](https://www.nlm.nih.gov/research/umls/)
 - [SciSpaCy](https://allenai.github.io/scispacy/)
 
@@ -136,7 +136,7 @@ ollama run gemma:9b
 ## 📬 Contact
 
 For questions or collaborations:  
-📧 `phdResearcherDz [at] gmail [dot] com`  
+📧 `amrani.mohamed.chakib [at] gmail [dot] com`  
 🔗 GitHub: [@phdResearcherDz](https://github.com/phdResearcherDz)
 
 ---
