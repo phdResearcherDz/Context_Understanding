@@ -36,11 +36,20 @@ The entire pipeline is modular and broken into numbered stages, each represented
 - `_2_Entities_Linking`: Link normalized entities to a knowledge graph
 - `_3_Relations_Extraction`: Extract semantic relations
 - `_4_Filtering_Relations`: Filter relations based on query relevance
-- `_5_relevant_text_explanations_formating`: Format explanations for final context enrichment
+- `_5_Relevant_Text_Explanations_Formatting`: Format explanations for final context enrichment
 
 Each folder contains standalone scripts. Execute them sequentially on your dataset to maintain coherence between stages.
 
-**Note**: The dataset must be preprocessed using `_0_Datasets_Preprocess` to ensure compatibility with downstream modules.
+> **Note**: The dataset must be preprocessed using `_0_Datasets_Preprocessing` to ensure compatibility with downstream modules.  
+> 
+> The `_Baseline_Relation_Filters` folder provides baseline implementations for relation filtering, which serve as comparison benchmarks. These include:
+> 
+> - `_1_Random_Relation_Addition.py`
+> - `_2_Top_N_Relation_Frequency.py`
+> - `_3_Random_Entity_Sampling.py`
+> - `_4_Cluster_Based.py`
+> - `_5_TFIDF_Weighted_Relations.py`
+> - `_6_Dense_Retrieval_for_Relation_Ranking.py`
 
 ---
 ## 🚀 Installation & Dependencies
