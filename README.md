@@ -27,7 +27,22 @@ Existing Retrieval-Augmented Generation (RAG) methods typically retrieve relevan
 ![Pipeline Overview](https://github.com/user-attachments/assets/02d89495-2866-4f3e-a875-46c8452cc3d3)
 
 ---
+## 🔢 Pipeline Execution
 
+The entire pipeline is modular and broken into numbered stages, each represented by a folder:
+
+- `_0_Datasets_Preprocess`: Format your dataset into the required structure
+- `_1_Entities_Extraction_Normalization`: Extract and normalize biomedical entities
+- `_2_Entities_Linking`: Link normalized entities to a knowledge graph
+- `_3_Relations_Extraction`: Extract semantic relations
+- `_4_Filtering_Relations`: Filter relations based on query relevance
+- `_5_relevant_text_explanations_formating`: Format explanations for final context enrichment
+
+Each folder contains standalone scripts. Execute them sequentially on your dataset to maintain coherence between stages.
+
+**Note**: The dataset must be preprocessed using `_0_Datasets_Preprocess` to ensure compatibility with downstream modules.
+
+---
 ## 🚀 Installation & Dependencies
 
 Install the required dependencies with:
