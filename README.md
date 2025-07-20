@@ -143,13 +143,13 @@ In certain experiments (e.g., adding both definitions and relations), excessive 
 
 - **Effect**: Truncated questions or answers, leading to degraded accuracy despite enrichment.
 
-### 🔹 3. Entity Recognition or Linking Failures
+### 🔹 2. Entity Recognition or Linking Failures
 Ambiguous or rare biomedical terms may result in incorrect entity normalization or knowledge graph linking.
 
 - **Effect**: Incorrect enrichments that affect downstream predictions.
 - **Fix**: We use four domain-specialized NER models and **context-aware normalization** (via embeddings) to minimize errors.
 
-### 🔹 5. Hardware Considerations
+### 🔹 3. Hardware Considerations
 Although lightweight, the full pipeline introduces some latency and may require moderate compute.
 
 - **Effect**: Adds **800–1600ms latency** per question. Limited-VRAM GPUs (<8GB) may struggle with full few-shot evaluations.
